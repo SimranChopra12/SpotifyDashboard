@@ -1,0 +1,8 @@
+step 1: created test.py to connect to spotify and print top songs from my account!!
+
+OAuth 2.0	     Secure delegated authentication
+Access token	 Temporary API permission
+Scope	Specific permission type
+Redirect URI	 Where Spotify sends auth response
+Loopback	     Local machine redirect
+
