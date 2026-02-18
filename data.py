@@ -5,6 +5,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import matplotlib.pyplot as plt
 import streamlit as st
+import plotly.express as px
+
 
 load_dotenv()
 st.set_page_config(
@@ -77,16 +79,32 @@ artist_counts= df["artist"].value_counts()
 print(artist_counts)
 
 #matplotlib:
-fig, ax = plt.subplots(figsize=(6, 2))
+st.subheader("Top Artists")
 
-artist_counts.plot(kind="bar", ax=ax)
-plt.title("Top Artists")
-plt.ylabel("Number of Tracks")
-plt.xticks(rotation=45)
-plt.tight_layout()
-st.pyplot(fig)
-st.subheader("Artist Frequency Table")
-st.dataframe(artist_counts)
+fig = px.bar(
+    artist_counts,
+    x=artist_counts.index,
+    y=artist_counts.values,
+    labels={"x": "Artist", "y": "Number of Tracks"},
+    title="Top Artists"
+)
+
+fig.update_traces(marker_color="black")
+fig.update_layout(
+    xaxis_tickangle=-45
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+# st.subheader("Artist Frequency Table")
+# st.dataframe(artist_counts)
 
 st.divider()
 st.caption("Built By Simran Chopra - Using Spotify API & Streamlit| Portfolio Project")
+
+
+
+all_genres =[]
+
+
+
