@@ -21,7 +21,6 @@ st.title("Spotify Listening Intelligence")
 st.markdown("Welcome to Simran Chopra's Spotify Summary!!")
 st.divider()
 
-#st.subheader("Welcome to Simran Chopra's Spotify Summary!!")
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope="user-top-read"
@@ -52,6 +51,7 @@ mapping = {
 spotify_value = mapping[time_range]
 
 results = sp.current_user_top_tracks(limit=number_songs, time_range=spotify_value)
+genres = sp.current_user_top_tracks(limit=number_songs, time_range=spotify_value)
 
 tracks = []
 
@@ -77,6 +77,13 @@ st.write("Average Duration:", round(df["duration_min"].mean(), 2))
 
 artist_counts= df["artist"].value_counts()
 print(artist_counts)
+most_common_artist = artist_counts.idxmax()
+
+st.markdown(f"""
+### Listening Insight
+You are currently most focused on **{most_common_artist}**.
+""")
+
 
 #matplotlib:
 st.subheader("Top Artists")
@@ -94,17 +101,39 @@ fig.update_layout(
     xaxis_tickangle=-45
 )
 
+
 st.plotly_chart(fig, use_container_width=True)
 
-# st.subheader("Artist Frequency Table")
-# st.dataframe(artist_counts)
+all_genres =[]
+artist_result = sp.current_user_top_artists(
+    limit=20,
+    time_range=spotify_value
+)
+st.write(len(artist_result["items"]))
+st.write(artist_result["items"][0])
+
+for artist in artist_result["items"]:
+    full_artist = sp.artist(artist["id"])
+    st.write(full_artist["name"], full_artist.get("genres"))
+    
+full_artist = sp.artist(artist["id"])
+st.write(full_artist.keys())
+
+
+for artist in artist_result["items"]:
+    full_artist = sp.artist(artist["id"])
+    all_genres.extend(full_artist.get("genres", []))
+
+if all_genres:
+    genre_count = pd.Series(all_genres).value_counts().head(10)
+    
+    fig2 = px.bar(
+            genre_count.sort_values(),
+            orientation="h",
+            title="Top Genres"
+        )
+
+    st.plotly_chart(fig2)
 
 st.divider()
 st.caption("Built By Simran Chopra - Using Spotify API & Streamlit| Portfolio Project")
-
-
-
-all_genres =[]
-
-
-
