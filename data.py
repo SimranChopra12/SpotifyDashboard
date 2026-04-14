@@ -42,7 +42,7 @@ if "code" not in query_params:
 code = query_params["code"]
 token_info = sp_oauth.get_access_token(code)
 
-sp = Spotify(auth=token_info["access_token"])
+token_info = sp_oauth.get_access_token(code, as_dict=True)
 
 # print(dir(sp))
 # print(" ")
