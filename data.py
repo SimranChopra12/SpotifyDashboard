@@ -6,6 +6,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.express as px
+from spotipy import Spotify
 
 
 load_dotenv()
@@ -19,12 +20,34 @@ st.set_page_config(
 st.title("Spotify Listening Intelligence")
 
 st.markdown("Welcome to Simran Chopra's Spotify Summary!!")
+st.write("Here’s how I analyze user behavior, identify product risks, and design experiments to improve engagement")
 st.divider()
 
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope="user-top-read"
 ))
+
+
+sp_oauth = SpotifyOAuth(
+    client_id=st.secrets["SPOTIPY_CLIENT_ID"],
+    client_secret=st.secrets["SPOTIPY_CLIENT_SECRET"],
+    redirect_uri=st.secrets["SPOTIPY_REDIRECT_URI"],
+    scope="user-top-read",
+    open_browser=False
+)
+
+query_params = st.query_params
+
+if "code" not in query_params:
+    auth_url = sp_oauth.get_authorize_url()
+    st.markdown(f"[Login to Spotify]({auth_url})")
+    st.stop()
+
+code = query_params["code"]
+token_info = sp_oauth.get_access_token(code)
+
+sp = Spotify(auth=token_info["access_token"])
 
 # print(dir(sp))
 # print(" ")
@@ -104,36 +127,45 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-all_genres =[]
-artist_result = sp.current_user_top_artists(
-    limit=20,
-    time_range=spotify_value
-)
-st.write(len(artist_result["items"]))
-st.write(artist_result["items"][0])
 
-for artist in artist_result["items"]:
-    full_artist = sp.artist(artist["id"])
-    st.write(full_artist["name"], full_artist.get("genres"))
+# removing code for genre:
+
+# all_genres =[]
+# artist_result = sp.current_user_top_artists(
+#     limit=20,
+#     time_range=spotify_value
+# )
+# st.write(len(artist_result["items"]))
+# st.write(artist_result["items"][0])
+
+# for artist in artist_result["items"]:
+#     full_artist = sp.artist(artist["id"])
+#     st.write(full_artist["name"], full_artist.get("genres"))
     
-full_artist = sp.artist(artist["id"])
-st.write(full_artist.keys())
+# full_artist = sp.artist(artist["id"])
+# st.write(full_artist.keys())
 
 
-for artist in artist_result["items"]:
-    full_artist = sp.artist(artist["id"])
-    all_genres.extend(full_artist.get("genres", []))
+# for artist in artist_result["items"]:
+#     full_artist = sp.artist(artist["id"])
+#     all_genres.extend(full_artist.get("genres", []))
 
-if all_genres:
-    genre_count = pd.Series(all_genres).value_counts().head(10)
+# if all_genres:
+#     genre_count = pd.Series(all_genres).value_counts().head(10)
     
-    fig2 = px.bar(
-            genre_count.sort_values(),
-            orientation="h",
-            title="Top Genres"
-        )
+#     fig2 = px.bar(
+#             genre_count.sort_values(),
+#             orientation="h",
+#             title="Top Genres"
+#         )
 
-    st.plotly_chart(fig2)
+#     st.plotly_chart(fig2)
+
+shares = df["artist"].value_counts(normalize=True)
+hhi = float((shares ** 2).sum())
+
+st.metric("Listening Concentration (HHI)", round(hhi, 3))
+
 
 st.divider()
 st.caption("Built By Simran Chopra - Using Spotify API & Streamlit| Portfolio Project")
