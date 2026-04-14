@@ -24,25 +24,9 @@ st.write("Here’s how I analyze user behavior, identify product risks, and desi
 st.divider()
 
 
-sp_oauth = SpotifyOAuth(
-    client_id=st.secrets["SPOTIPY_CLIENT_ID"],
-    client_secret=st.secrets["SPOTIPY_CLIENT_SECRET"],
-    redirect_uri=st.secrets["SPOTIPY_REDIRECT_URI"],
-    scope="user-top-read",
-    open_browser=False
-)
-
-query_params = st.query_params
-
-if "code" not in query_params:
-    auth_url = sp_oauth.get_authorize_url()
-    st.markdown(f"[Login to Spotify]({auth_url})")
-    st.stop()
-
-code = query_params["code"]
-token_info = sp_oauth.get_access_token(code)
-
-token_info = sp_oauth.get_access_token(code, as_dict=True)
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+    scope="user-top-read"
+))
 
 # print(dir(sp))
 # print(" ")
