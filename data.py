@@ -24,11 +24,6 @@ st.write("Here’s how I analyze user behavior, identify product risks, and desi
 st.divider()
 
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    scope="user-top-read"
-))
-
-
 sp_oauth = SpotifyOAuth(
     client_id=st.secrets["SPOTIPY_CLIENT_ID"],
     client_secret=st.secrets["SPOTIPY_CLIENT_SECRET"],
