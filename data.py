@@ -1,21 +1,16 @@
 import os
 import pandas as pd
 from dotenv import load_dotenv
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+
 import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.express as px
-from spotipy import Spotify
 
-
-load_dotenv()
 st.set_page_config(
     page_title="Spotify Listening Intelligence",
     page_icon="🎵",
     layout="wide"
 )
-
 
 st.title("Spotify Listening Intelligence")
 
@@ -23,21 +18,16 @@ st.markdown("Welcome to Simran Chopra's Spotify Summary!!")
 st.write("Here’s how I analyze user behavior, identify product risks, and design experiments to improve engagement")
 st.divider()
 
-
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    scope="user-top-read"
-))
-
-# print(dir(sp))
-# print(" ")
-# help(sp.current_user_top_tracks)
-# print(" ")
+df = pd.read_csv("spotify_dataset.csv")
 
 time_range = st.selectbox(
     "Select Time Range",
     ["Last Month", "Last 6 Months", "All Time"]
 )
-
+user_type = st.selectbox(
+    "User Segment",
+    ["Balanced", "Loyalist (High Concentration)", "Explorer (High Diversity)"]
+)
 number_songs = st.slider(
     "Number of Songs",
     min_value=10,
@@ -45,28 +35,12 @@ number_songs = st.slider(
     value=20
 )
 
-mapping = {
-    "Last Month": "short_term",
-    "Last 6 Months": "medium_term",
-    "All Time": "long_term"
-}
-spotify_value = mapping[time_range]
-
-results = sp.current_user_top_tracks(limit=number_songs, time_range=spotify_value)
-genres = sp.current_user_top_tracks(limit=number_songs, time_range=spotify_value)
-
-tracks = []
-
-for item in results["items"]:
-    tracks.append({
-        "name": item["name"],
-        "artist": item["artists"][0]["name"],
-        "duration_min": item["duration_ms"] / 60000,
-        "explicit": item["explicit"]
-    })
-
-df = pd.DataFrame(tracks)
-
+if user_type == "Balanced":
+    df = pd.read_csv("spotify_dataset.csv")
+elif user_type == "Loyalist (High Concentration)":
+    df = pd.read_csv("loyalist.csv")
+else:
+    df = pd.read_csv("explorer.csv")
 
 col1, col2, col3 = st.columns(3)
 
@@ -86,7 +60,6 @@ st.markdown(f"""
 You are currently most focused on **{most_common_artist}**.
 """)
 
-
 #matplotlib:
 st.subheader("Top Artists")
 
@@ -105,40 +78,6 @@ fig.update_layout(
 
 
 st.plotly_chart(fig, use_container_width=True)
-
-
-# removing code for genre:
-
-# all_genres =[]
-# artist_result = sp.current_user_top_artists(
-#     limit=20,
-#     time_range=spotify_value
-# )
-# st.write(len(artist_result["items"]))
-# st.write(artist_result["items"][0])
-
-# for artist in artist_result["items"]:
-#     full_artist = sp.artist(artist["id"])
-#     st.write(full_artist["name"], full_artist.get("genres"))
-    
-# full_artist = sp.artist(artist["id"])
-# st.write(full_artist.keys())
-
-
-# for artist in artist_result["items"]:
-#     full_artist = sp.artist(artist["id"])
-#     all_genres.extend(full_artist.get("genres", []))
-
-# if all_genres:
-#     genre_count = pd.Series(all_genres).value_counts().head(10)
-    
-#     fig2 = px.bar(
-#             genre_count.sort_values(),
-#             orientation="h",
-#             title="Top Genres"
-#         )
-
-#     st.plotly_chart(fig2)
 
 shares = df["artist"].value_counts(normalize=True)
 hhi = float((shares ** 2).sum())
