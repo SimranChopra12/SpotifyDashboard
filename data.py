@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import streamlit as st
 import plotly.express as px
-
+if st.query_params.get("health") == "1":
+    st.write("ok")
+    st.stop()
 st.set_page_config(
     page_title="Spotify Listening Intelligence",
     page_icon="🎵",
